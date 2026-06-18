@@ -55,6 +55,7 @@ add_library(oomph::oomph ALIAS oomph)
 target_link_libraries(oomph INTERFACE HWMALLOC::hwmalloc)
 target_link_libraries(oomph INTERFACE MPI::MPI_CXX)
 target_link_libraries(oomph INTERFACE Boost::boost)
+target_link_libraries(oomph INTERFACE atomic)
 include(oomph_common)
 
 # ---------------------------------------------------------------------
