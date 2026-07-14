@@ -46,6 +46,9 @@ function(oomph_shared_lib_options target)
     oomph_target_compile_options(${target})
     oomph_target_link_options(${target})
     target_link_libraries(${target} PUBLIC HWMALLOC::hwmalloc)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_link_libraries(${target} PUBLIC atomic)
+    endif()
 endfunction()
 
 # ---------------------------------------------------------------------
