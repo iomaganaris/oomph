@@ -74,7 +74,7 @@ TEST_F(mpi_test_fixture, context_ordered)
         //for (int i = 0; i < num_threads; ++i) threads.push_back(std::thread{func, i});
         //for (auto& t : threads) t.join();
     } catch (std::runtime_error const& e) {
-        oomph::test::handle_nccl_thread_safe_exception(e);
+        oomph::test::handle_nccl_like_thread_safe_exception(e);
     }
 }
 

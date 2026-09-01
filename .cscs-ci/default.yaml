@@ -46,6 +46,14 @@ build_deps_ucx:
     - .container-builder-cscs-gh200
     - .build_deps_template
 
+# TODO: RCCL CI requires an AMD GPU runner, a ROCm base image, and a
+# backend=rccl variant in the spack oomph package.
+# build_deps_rccl:
+#   variables:
+#     BACKEND: rccl
+#   extends:
+#     - .build_deps_template
+
 # TODO: Libfabric tests are currently failing on Alps and need to be fixed.
 # build_deps_libfabric:
 #   variables:
@@ -99,6 +107,16 @@ build_ucx:
 #   extends: .build_template
 #   needs:
 #     - job: build_deps_libfabric
+#       artifacts: true
+
+# TODO: RCCL CI requires an AMD GPU runner, a ROCm base image, and a
+# backend=rccl variant in the spack oomph package.
+# build_rccl:
+#   variables:
+#     BACKEND: rccl
+#   extends: .build_template
+#   needs:
+#     - job: build_deps_rccl
 #       artifacts: true
 
 .test_template_base:
@@ -181,6 +199,22 @@ test_parallel_ucx:
 #   extends: .test_serial_template
 #   needs:
 #     - job: build_libfabric
+#       artifacts: true
+#   image: $BUILD_IMAGE
+
+# TODO: RCCL CI requires an AMD GPU runner, a ROCm base image, and a
+# backend=rccl variant in the spack oomph package.
+# test_serial_rccl:
+#   extends: .test_serial_template
+#   needs:
+#     - job: build_rccl
+#       artifacts: true
+#   image: $BUILD_IMAGE
+
+# test_parallel_rccl:
+#   extends: .test_parallel_template
+#   needs:
+#     - job: build_rccl
 #       artifacts: true
 #   image: $BUILD_IMAGE
 

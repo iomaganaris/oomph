@@ -10,6 +10,7 @@
 #include <oomph/context.hpp>
 #include <gtest/gtest.h>
 #include "./mpi_runner/mpi_test_fixture.hpp"
+#include "./nccl_test_helpers.hpp"
 
 TEST_F(mpi_test_fixture, group_progress_wait)
 {
@@ -30,7 +31,7 @@ TEST_F(mpi_test_fixture, group_progress_wait)
     auto req_send = comm.send(buf_send, next_rank, 0);
     auto req_recv = comm.recv(buf_recv, prev_rank, 0);
 
-    if (ctxt.get_transport_option("name") == std::string("nccl"))
+    if (oomph::test::is_nccl_like_backend(ctxt))
     {
         EXPECT_THROW(comm.progress(), std::logic_error);
         EXPECT_THROW(req_send.wait(), std::logic_error);
@@ -44,8 +45,8 @@ TEST_F(mpi_test_fixture, group_progress_wait)
     }
     comm.end_group();
 
-    // For nccl, we threw during wait, so requests are not finished.
-    if (ctxt.get_transport_option("name") == std::string("nccl"))
+    // For nccl-like backends, we threw during wait, so requests are not finished.
+    if (oomph::test::is_nccl_like_backend(ctxt))
     {
         req_send.wait();
         req_recv.wait();

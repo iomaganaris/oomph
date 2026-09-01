@@ -26,3 +26,7 @@ endif()
 if (OOMPH_WITH_NCCL)
     add_subdirectory(nccl)
 endif()
+
+if (OOMPH_WITH_RCCL)
+    add_subdirectory(rccl)
+endif()

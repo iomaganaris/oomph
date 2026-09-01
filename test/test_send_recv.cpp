@@ -211,7 +211,7 @@ launch_test(Func f)
     }
     catch (std::runtime_error const& e)
     {
-        oomph::test::handle_nccl_thread_safe_exception(e);
+        oomph::test::handle_nccl_like_thread_safe_exception(e);
     }
 }
 
@@ -643,7 +643,19 @@ TEST_F(mpi_test_fixture, self_send_recv)
     auto           buf = comm.make_buffer<rank_type>(64);
     auto           rbuf = comm.make_buffer<rank_type>(64);
 
+    const char* self_comm_error_msg = nullptr;
     if (oomph::test::is_nccl_backend(ctxt))
+    {
+        self_comm_error_msg = "oomph NCCL backend: self-send/recv requires an active NCCL group. "
+                              "Use start_group()/end_group() around self-send/recv operations.";
+    }
+    else if (oomph::test::is_rccl_backend(ctxt))
+    {
+        self_comm_error_msg = "oomph RCCL backend: self-send/recv requires an active RCCL group. "
+                              "Use start_group()/end_group() around self-send/recv operations.";
+    }
+
+    if (self_comm_error_msg)
     {
         EXPECT_THROW(
             {
@@ -653,9 +665,7 @@ TEST_F(mpi_test_fixture, self_send_recv)
                 }
                 catch (std::runtime_error const& e)
                 {
-                    EXPECT_STREQ(e.what(),
-                        "oomph NCCL backend: self-send/recv requires an active NCCL group. "
-                        "Use start_group()/end_group() around self-send/recv operations.");
+                    EXPECT_STREQ(e.what(), self_comm_error_msg);
                     throw;
                 }
             },
@@ -669,9 +679,7 @@ TEST_F(mpi_test_fixture, self_send_recv)
                 }
                 catch (std::runtime_error const& e)
                 {
-                    EXPECT_STREQ(e.what(),
-                        "oomph NCCL backend: self-send/recv requires an active NCCL group. "
-                        "Use start_group()/end_group() around self-send/recv operations.");
+                    EXPECT_STREQ(e.what(), self_comm_error_msg);
                     throw;
                 }
             },

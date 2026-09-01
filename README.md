@@ -5,7 +5,8 @@
 
 **Oomph** is a library for enabling high performance point-to-point, asynchronous communication over
 different fabrics. It leverages the ubiquitous MPI library as well as UCX and Libfabric. Both
-device and host memory are supported. A subset of functionality is also supported with NCCL. Under
+device and host memory are supported. A subset of functionality is also supported with NCCL on
+NVIDIA GPUs and with RCCL on AMD GPUs. Under
 the hood it uses [hwmalloc](https://github.com/ghex-org/hwmalloc) for memory registration.
 
 **selling points**
@@ -139,12 +140,12 @@ while(!completed) { comm.progress(); }
 
 ### Groups
 
-Communicators expose group functionality as provided by NCCL (with
-ncclGroupStart and ncclGroupEnd). For non-NCCL backends the group functionality
-is a no-op. For NCCL using the group functionality can be a both a requirement
-to avoid deadlocks (communication within a group can make progress
+Communicators expose group functionality as provided by NCCL and RCCL (with
+ncclGroupStart and ncclGroupEnd). For other backends the group functionality
+is a no-op. For NCCL and RCCL using the group functionality can be a both a
+requirement to avoid deadlocks (communication within a group can make progress
 independently, while outside of a group communication is ordered) and for
-performance (a single device kernel is submitted for a NCCL group). 
+performance (a single device kernel is submitted for a NCCL/RCCL group). 
 
 Groups are created by explicitly starting and ending the group:
 
@@ -162,41 +163,41 @@ rreq.wait();
 ### Stream awareness
 
 Some backend implementations can schedule communication on a GPU stream.
-Currently only the NCCL backend makes use of this. All other backends ignore
-the stream argument. To query if a backend is stream-aware use the
+Currently only the NCCL and RCCL backends make use of this. All other backends
+ignore the stream argument. To query if a backend is stream-aware use the
 `is_stream_aware` member query on a communicator. The stream can be passed as
 an optional last parameter to `send` or `recv`:
 
 ```cpp
 if (comm.is_stream_aware()) {
-    // Schedule communication on the default CUDA stream if the backend is
+    // Schedule communication on the default CUDA/HIP stream if the backend is
     // stream aware
-    cudaStream_t stream = 0;
+    cudaStream_t stream = 0; // hipStream_t for the RCCL backend
     oomph::send_request req = comm.send(msg, 1, 0, stream);
 }
 ```
 
-### NCCL restrictions
+### NCCL and RCCL restrictions
 
-NCCL has significantly different semantics from MPI, libfabric, and UCX which
-is reflected in a number of restrictions on how the NCCL communicator can be
-used:
+NCCL and RCCL have significantly different semantics from MPI, libfabric, and
+UCX which is reflected in a number of restrictions on how the NCCL and RCCL
+communicators can be used:
 
-- Tags are not supported by NCCL and ignored by the backend. Communication
-  order on different ranks must match (except within NCCL groups where there is
-  some flexibility). This also means that e.g. recv should not be called before
-  send unless within a NCCL group.
-- The `thread_safe` option for the NCCL communicator is not supported because
-  of the above ordering restrictions.
+- Tags are not supported by NCCL and RCCL and ignored by the backend.
+  Communication order on different ranks must match (except within NCCL/RCCL
+  groups where there is some flexibility). This also means that e.g. recv
+  should not be called before send unless within a NCCL/RCCL group.
+- The `thread_safe` option for the NCCL and RCCL communicators is not supported
+  because of the above ordering restrictions.
 - Cancellation is not supported.
-- `wait` and `progress` are disallowed when a NCCL group is active as no
-  progress can be made until a NCCL group is ended and submitted.
-- Send/recv to own rank is supported within NCCL groups. Outside of a group,
-  self-send/recv will throw an exception because NCCL's order-based matching
-  requires the atomic submission that groups provide.
+- `wait` and `progress` are disallowed when a NCCL/RCCL group is active as no
+  progress can be made until a NCCL/RCCL group is ended and submitted.
+- Send/recv to own rank is supported within NCCL/RCCL groups. Outside of a
+  group, self-send/recv will throw an exception because NCCL's and RCCL's
+  order-based matching requires the atomic submission that groups provide.
 
-The NCCL backend is primarily designed for use in GHEX where these differences
-can be hidden from the user.
+The NCCL and RCCL backends are primarily designed for use in GHEX where these
+differences can be hidden from the user.
 
 ## Acknowledgments
 This work was financially supported by the PRACE project funded in part by the EU's Horizon 2020

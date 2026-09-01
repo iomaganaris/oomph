@@ -1,0 +1,6 @@
+spack:
+  specs:
+  - oomph@main backend=rccl +rocm
+  view: false
+  concretizer:
+    unify: true

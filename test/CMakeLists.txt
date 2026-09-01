@@ -97,4 +97,10 @@ if (OOMPH_WITH_NCCL)
     endforeach()
 endif()
 
+if (OOMPH_WITH_RCCL)
+    foreach(t ${parallel_tests})
+        reg_parallel_test(${t} rccl 4)
+    endforeach()
+endif()
+
 add_subdirectory(bindings)

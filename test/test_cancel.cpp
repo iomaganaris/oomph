@@ -66,9 +66,9 @@ TEST_F(mpi_test_fixture, test_cancel_request)
 {
     using namespace oomph;
     auto ctxt = context(MPI_COMM_WORLD, false);
-    if (ctxt.get_transport_option("name") == std::string("nccl"))
+    if (oomph::test::is_nccl_like_backend(ctxt))
     {
-        GTEST_SKIP() << "NCCL does not support cancellation";
+        GTEST_SKIP() << "NCCL/RCCL does not support cancellation";
     }
     auto comm = ctxt.get_communicator();
     test_1(comm, 1);
@@ -94,7 +94,7 @@ TEST_F(mpi_test_fixture, test_cancel_request_mt)
             }});
         for (auto& t : threads) t.join();
     } catch (std::runtime_error const& e) {
-        oomph::test::handle_nccl_thread_safe_exception(e);
+        oomph::test::handle_nccl_like_thread_safe_exception(e);
     }
 }
 
@@ -154,9 +154,9 @@ TEST_F(mpi_test_fixture, test_cancel_cb)
 {
     using namespace oomph;
     auto ctxt = context(MPI_COMM_WORLD, false);
-    if (ctxt.get_transport_option("name") == std::string("nccl"))
+    if (oomph::test::is_nccl_like_backend(ctxt))
     {
-        GTEST_SKIP() << "NCCL does not support cancellation";
+        GTEST_SKIP() << "NCCL/RCCL does not support cancellation";
     }
     auto comm = ctxt.get_communicator();
     test_2(comm, 1);
@@ -182,6 +182,6 @@ TEST_F(mpi_test_fixture, test_cancel_cb_mt)
             }});
         for (auto& t : threads) t.join();
     } catch (std::runtime_error const& e) {
-        oomph::test::handle_nccl_thread_safe_exception(e);
+        oomph::test::handle_nccl_like_thread_safe_exception(e);
     }
 }

@@ -86,6 +86,11 @@ include(oomph_libfabric)
 include(oomph_nccl)
 
 # ---------------------------------------------------------------------
+# oomph RCCL variant
+# ---------------------------------------------------------------------
+include(oomph_rccl)
+
+# ---------------------------------------------------------------------
 # main src subdir
 # ---------------------------------------------------------------------
 add_subdirectory(src)
@@ -148,6 +153,7 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/oomphConfigVersion.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/FindLibfabric.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/FindNCCL.cmake
+        ${CMAKE_CURRENT_LIST_DIR}/cmake/FindRCCL.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/FindUCX.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/FindPMIx.cmake
     DESTINATION
